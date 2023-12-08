@@ -1,14 +1,11 @@
 import { PetApi, Tag } from '@ama-sdk/showcase-sdk';
 import type { Pet } from '@ama-sdk/showcase-sdk';
 import { ChangeDetectionStrategy, Component, computed, inject, signal, ViewEncapsulation } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { DfMedia } from '@design-factory/design-factory';
-import { NgbHighlight, NgbPagination, NgbPaginationPages } from '@ng-bootstrap/ng-bootstrap';
+import { NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { O3rComponent } from '@o3r/core';
 import { OtterPickerPresComponent } from '../../utilities';
-
-const FILTER_PAG_REGEX = /[^0-9]/g;
+import { DeferedPresComponent } from '../../defered/defered-pres.component';
 
 @O3rComponent({ componentType: 'Component' })
 @Component({
@@ -17,9 +14,8 @@ const FILTER_PAG_REGEX = /[^0-9]/g;
   imports: [
     NgbHighlight,
     FormsModule,
-    NgbPagination,
     OtterPickerPresComponent,
-    NgbPaginationPages
+    DeferedPresComponent
   ],
   templateUrl: './sdk-pres.template.html',
   styleUrls: ['./sdk-pres.style.scss'],
@@ -28,7 +24,6 @@ const FILTER_PAG_REGEX = /[^0-9]/g;
 })
 export class SdkPresComponent {
   private petStoreApi = inject(PetApi);
-  private mediaService = inject(DfMedia);
 
   /**
    * Name input used to create new pets
@@ -48,12 +43,14 @@ export class SdkPresComponent {
   /**
    * Number of items to display on a table page
    */
-  public pageSize = signal(10);
+  public pageSize!: number;
+
+  public deferedSelector = '<app-defered-pres [totalPetsAmount]="totalPetsAmount()" (pageSizeChanged)="pageSize = $event" (currentPageChanged)="currentPage = $event" ></app-defered-pres>';
 
   /**
    * Currently opened page on the table
    */
-  public currentPage = signal(1);
+  public currentPage!: number;
 
   /**
    * Complete list of pets retrieved from the API
@@ -96,13 +93,8 @@ export class SdkPresComponent {
    * List of pets displayed in the currently selected table page
    */
   public displayedPets = computed(() =>
-    this.filteredPets().slice((this.currentPage() - 1) * this.pageSize(), (this.currentPage()) * this.pageSize())
+    this.filteredPets().slice((this.currentPage - 1) * this.pageSize, (this.currentPage) * this.pageSize)
   );
-
-  /**
-   * True if screen size is 'xs' or 'sm'
-   */
-  public isSmallScreen = toSignal<boolean>(this.mediaService.getObservable(['xs', 'sm']));
 
   /** Base URL where the images can be fetched */
   public baseUrl = location.href.split('/#', 1)[0];
@@ -172,9 +164,5 @@ export class SdkPresComponent {
 
   public getTags(pet: Pet) {
     return pet.tags?.map((tag) => tag.name).join(',');
-  }
-
-  public formatPaginationInput(input: HTMLInputElement) {
-    input.value = input.value.replace(FILTER_PAG_REGEX, '');
   }
 }

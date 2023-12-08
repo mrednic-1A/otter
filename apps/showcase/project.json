@@ -80,6 +80,7 @@
               "maximumError": "4kb"
             }
           ],
+          "namedChunks": true,
           "outputHashing": "all"
         },
         "development": {

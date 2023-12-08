@@ -1,0 +1,26 @@
+<ngb-pagination [collectionSize]="totalPetsAmount" [page]="currentPage()" (pageChange)="currentPage.set($event)"
+  [pageSize]="pageSize()" aria-label="Default pagination" [boundaryLinks]="!isSmallScreen()"
+  [class.with-boundary-links]="!isSmallScreen()" class="df-custom-pages" size="sm">
+  <ng-template ngbPaginationPages let-page let-pages="pages">
+    @if (pages.length > 0) {
+    <li class="ngb-custom-pages-item">
+      <div class="d-flex flex-nowrap px-2">
+        <label id="table-pagination-paginationInputLabel" for="table-pagination-paginationInput"
+          class="col-form-label me-4 ms-1">Page</label>
+        <input #i type="text" inputmode="numeric" pattern="[0-9]*"
+          class="form-control df-custom-pages-input px-2 text-center" id="table-pagination-paginationInput"
+          [value]="page" (keyup.enter)="currentPage.set(+i.value); $event.preventDefault(); currentPageChanged.emit(currentPage())"
+          (blur)="currentPage.set(+i.value); currentPageChanged.emit(currentPage())" (input)="formatPaginationInput($any($event).target)"
+          aria-labelledby="table-pagination-paginationInputLabel table-pagination-paginationDescription" size="2" />
+        <span id="table-pagination-paginationDescription" class="col-form-label text-nowrap px-4"> of
+          {{pages.length}}</span>
+      </div>
+    </li>
+    }
+  </ng-template>
+</ngb-pagination>
+<select class="form-select w-auto" name="pageSize" [ngModel]="pageSize()" (ngModelChange)="pageSize.set($event); pageSizeChanged.emit(pageSize())">
+  <option [ngValue]="10">10 items per page</option>
+  <option [ngValue]="50">50 items per page</option>
+  <option [ngValue]="100">100 items per page</option>
+</select>
